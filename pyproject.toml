@@ -1,0 +1,32 @@
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "lerobot_camera_roscam"
+version = "0.1.0"
+description = "A bridge to make ROS image topics compatible with the LeRobot framework."
+readme = "README.md"
+requires-python = ">=3.8"
+license = {text = "Apache 2.0"}
+authors = [
+    {name = "Noah Böckmann", email = "kontakt@noahb.de"}
+]
+keywords = ["ros", "robotics", "lerobot", "computer-vision"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
+]
+
+# Core dependencies needed to run your package
+dependencies = [
+    "numpy",
+    "lerobot",
+    "opencv-python"
+]
+
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["lerobot_camera_roscam*"]

@@ -1,0 +1,60 @@
+# --- Python Bytecode & Cache ---
+__pycache__/
+*.py[cod]
+*$py.class
+
+# --- Distribution / Packaging ---
+# Essential for keeping build artifacts out of the repo
+build/
+dist/
+*.egg-info/
+.eggs/
+MANIFEST
+
+# --- Virtual Environments ---
+# Common names for local venvs
+venv/
+env/
+.venv/
+.env/
+
+# --- Testing & Coverage ---
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+coverage.xml
+*.cover
+
+# --- Type Checking (mypy) ---
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# --- Documentation ---
+# Sphinx
+docs/_build/
+# MkDocs
+site/
+
+# --- IDEs / Editors ---
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# --- Jupyter Notebooks ---
+.ipynb_checkpoints
+
+# --- Robotics / ROS Specific (Optional) ---
+# Ignore large log files and recorded data
+*.bag
+*.mcap
+*.pcd
+log/
+ros_logs/
+
+# --- Environment Variables (Security) ---
+# NEVER commit secrets
+.env
+.env.local

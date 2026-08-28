@@ -28,6 +28,8 @@ rosdep. When installing this package pip should take care of the rest.
 * `opencv-python`
 * `lerobot`
 
+If you experience slow framerates and network congestion consider [enabling the LARGE_DATA option](https://fast-dds.docs.eprosima.com/en/3.4.x/fastdds/use_cases/tcp/tcp_with_multicast_discovery.html#use-case-tcp-multicast) of ROS2's middleware FastDDS.
+
 ## Configuration
 
 The system uses `ROS2CameraConfig` to define connection parameters.

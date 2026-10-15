@@ -14,6 +14,7 @@
 
 import rclpy
 import threading
+import time
 import numpy as np
 from lerobot.cameras import Camera
 from lerobot.cameras.configs import ColorMode, Cv2Rotation
@@ -25,7 +26,7 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy, HistoryPolicy
 from sensor_msgs.msg import CompressedImage as CompressedRosImage
 from sensor_msgs.msg import Image as RawRosImage
 from cv_bridge import CvBridge, CvBridgeError
-from cv2 import cvtColor, rotate, COLOR_BGR2RGB, ROTATE_90_CLOCKWISE, ROTATE_90_COUNTERCLOCKWISE, ROTATE_180
+from cv2 import cvtColor, rotate, resize, INTER_AREA, COLOR_BGR2RGB, ROTATE_90_CLOCKWISE, ROTATE_90_COUNTERCLOCKWISE, ROTATE_180
 import message_filters
 
 # --- Typing Imports ---
@@ -71,6 +72,7 @@ class ROS2Camera(Camera):
         self._frame_lock = threading.Lock()
         self._new_frame_event = threading.Event()
         self._is_connected_flag = False
+        self._latest_frame_time: float = 0.0
 
     def connect(self, warmup: bool = True) -> None:
         """
@@ -209,7 +211,25 @@ class ROS2Camera(Camera):
             ymin, ymax, xmin, xmax = self.config.crop_box
             frame = frame[ymin:ymax, xmin:xmax]
 
+        if self.config.resize is not None:
+            frame = resize(frame, tuple(self.config.resize), interpolation=INTER_AREA)
+
         return frame
+
+    def read_latest(self, max_age_ms: int = 500) -> NDArray[Any]:
+        """Return the most recent frame without waiting; raise TimeoutError if it is older than `max_age_ms`."""
+        if not self.is_connected:
+            raise ConnectionError("Camera is not connected.")
+
+        with self._frame_lock:
+            age_ms = (time.monotonic() - self._latest_frame_time) * 1e3
+            has_frame = self._latest_frame is not None
+
+        if not has_frame:
+            raise RuntimeError("No frame has been received yet.")
+        if age_ms > max_age_ms:
+            raise TimeoutError(f"Latest frame is {age_ms:.0f}ms old (max {max_age_ms}ms).")
+        return self.read()
 
     def async_read(self, timeout_ms: float = 1000.0) -> NDArray[Any]:
         """
@@ -284,6 +304,7 @@ class ROS2Camera(Camera):
             with self._frame_lock:
                 # Store the pair of frames
                 self._latest_frame = frame
+                self._latest_frame_time = time.monotonic()
 
                 # Update camera properties from the RGB frame
                 if self.width is None or self.height is None:
@@ -313,6 +334,7 @@ class ROS2Camera(Camera):
             
             with self._frame_lock:
                 self._latest_frame = cv_frame
+                self._latest_frame_time = time.monotonic()
 
                 # Update camera properties from the first message
                 if self.width is None or self.height is None:
